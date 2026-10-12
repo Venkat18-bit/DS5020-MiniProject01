@@ -1,0 +1,10 @@
+Metric,Value
+Customers,5474.0
+Products,4534.0
+Total possible entries,24819116.0
+Non-zero entries,417742.0
+Density (%),1.68
+Sparsity (%),98.32
+Dense memory (MiB),94.68
+Sparse memory (MiB),3.21
+Memory saved (%),96.61

@@ -1,0 +1,17 @@
+
+# Python virtual environment
+.venv/
+
+# Python temporary files
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Original dataset
+data/raw/
+
+# Large generated model and matrix files
+outputs/*.npy
+outputs/*.npz
+
+# Keep generated CSV reports and PNG figures

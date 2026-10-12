@@ -1,0 +1,3 @@
+Method,Components,Fit Time (seconds),Python Peak Memory (MB),Stored Factors (MB),Explained Variance (%),Relative Reconstruction Error
+TruncatedSVD,50,0.1893,4.91,1.91,27.1,0.8337
+PCA,50,0.2675,99.53,1.93,27.17,

@@ -1,0 +1,9 @@
+Metric,Value
+First transaction,2009-12-01 07:45:00
+Last transaction,2011-12-09 12:50:00
+Train/Test cutoff,2011-10-09 12:50:00
+Training rows,684101
+Testing rows,118563
+Eligible test rows,52582
+Eligible test customers,1916
+Eligible test products,2674

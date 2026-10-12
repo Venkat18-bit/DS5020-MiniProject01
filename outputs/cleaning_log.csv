@@ -1,0 +1,7 @@
+Cleaning Step,Rows Removed,Rows Remaining
+Cancelled invoices,19494,1047877
+Non-positive quantities,3457,1044420
+Non-positive prices,2750,1041670
+Non-product codes,4551,1037119
+Missing Customer IDs,234455,802664
+Missing Descriptions,0,802664

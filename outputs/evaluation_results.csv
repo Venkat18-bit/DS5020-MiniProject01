@@ -1,0 +1,8 @@
+Model,Components,Hit Rate@10 (%),Customers Hit,Evaluation Time (seconds)
+Bestseller Baseline,0,26.83,514,
+TruncatedSVD Cosine,10,27.51,527,0.89
+TruncatedSVD Cosine,20,29.96,574,1.32
+TruncatedSVD Cosine,50,30.32,581,1.27
+TruncatedSVD Cosine,100,30.32,581,1.56
+TruncatedSVD Cosine,200,27.3,523,1.32
+PCA Cosine,50,30.32,581,1.13

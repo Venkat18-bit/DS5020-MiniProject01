@@ -12,19 +12,32 @@ customer_2d=embeddings[:,:2]
 KMeans=KMeans(n_clusters=4,random_state=42,n_init=10)
 clusters=KMeans.fit_predict(embeddings)
 
-plt.figure(figsize=(10, 7))
-scatter = plt.scatter(customer_2d[:, 0],customer_2d[:, 1],c=clusters,cmap="tab10",s=10,alpha=0.6)
+#visualization
 
+segment_names = {
+    0: "General Gift & Homeware Shoppers",
+    1: "Occasional Mixed-Product Shoppers",
+    2: "High-Activity Gift & Homeware Shoppers",
+    3: "Small Specialty-Product Group"
+}
+plt.figure(figsize=(11, 7))
+for cluster_id in range(4):
+    mask = clusters == cluster_id
+    plt.scatter(
+        customer_2d[mask, 0],
+        customer_2d[mask, 1],
+        s=10,
+        alpha=0.6,
+        label=f"Cluster {cluster_id}: {segment_names[cluster_id]}"
+    )
 plt.xlabel("SVD Component 1")
 plt.ylabel("SVD Component 2")
 plt.title("Customer Segmentation Using TruncatedSVD")
-
-plt.colorbar(scatter, label="Cluster")
+plt.legend(loc="upper right", fontsize=8)
 plt.tight_layout()
-
-plt.savefig(output_dir / "customer_clusters.png",dpi=300)
-
+plt.savefig(output_dir / "customer_clusters.png", dpi=300)
 plt.show()
+
 
 print("\n--- ML6: Customer Segmentation ---")
 print("Total customers:", len(clusters))

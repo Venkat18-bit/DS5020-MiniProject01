@@ -1,12 +1,13 @@
 
-# DS5020 Mini-Project 01: Customers Like You
-## PCA vs SVD for Retail Product Recommendations
+# DS5020 Mini-Project #1
+
+## PCA vs. SVD for Retail Product Recommendations and Customer Segmentation
 
 **Course:** DS5020  
 **Student:** Vaenkatakrishnan Srinivasan  
 **Project Type:** Individual  
 **Roles:** Data Engineer and Machine Learning Engineer  
-**Dataset:** UCI Online Retail II
+**Dataset:** UCI Online Retail II  
 
 ---
 
@@ -14,9 +15,11 @@
 
 This project develops a personalized product recommendation system using customer purchasing behavior from the UCI Online Retail II dataset.
 
-The project focuses on dimensionality reduction using Principal Component Analysis (PCA) and Truncated Singular Value Decomposition (TruncatedSVD), with TruncatedSVD selected as the primary method because of the sparsity of the customer-product matrix.
+The main objective is to investigate dimensionality reduction using Principal Component Analysis (PCA) and Truncated Singular Value Decomposition (TruncatedSVD), with TruncatedSVD selected as the primary method because the customer-product matrix is highly sparse.
 
 Product recommendations are generated using cosine similarity between product factor vectors. Performance is evaluated using Hit Rate@10 on held-out purchases and compared against a bestseller baseline.
+
+The project also uses K-Means clustering to identify four customer segments and visualize their purchasing patterns.
 
 ### Project Objectives
 
@@ -24,32 +27,32 @@ Product recommendations are generated using cosine similarity between product fa
 - Build a sparse customer-product purchase matrix.
 - Apply PCA and TruncatedSVD for dimensionality reduction.
 - Generate top-10 personalized product recommendations.
-- Compare recommendation performance against a bestseller baseline.
+- Compare recommendations against a bestseller baseline.
 - Evaluate performance using Hit Rate@10.
 - Measure model fitting time, memory usage, and recommendation runtime.
 - Visualize customer segments in two dimensions.
 - Interpret customer groups using popular products and countries.
 
-### Success Targets
+### Project Results Summary
 
-The project aims to:
+| Metric | Result |
+|---|---|
+| Original transactions | 1,067,371 |
+| Cleaned transactions | 802,664 |
+| Training customers | 5,474 |
+| Training products | 4,534 |
+| Matrix sparsity | 98.32% |
+| Selected method | TruncatedSVD |
+| Selected components | 50 |
+| Recommendations generated | 54,740 |
+| Evaluation customers | 1,916 |
+| Bestseller Hit Rate@10 | 26.83% |
+| TruncatedSVD Hit Rate@10 | 30.32% |
+| Improvement | +3.49 percentage points |
+| Recommendation generation runtime | 2.27 seconds |
+| Customer clusters | 4 |
 
-- Produce 10 product recommendations per eligible customer.
-- Evaluate recommendations using Hit Rate@10.
-- Compare the recommendation model against a top-10 bestseller baseline.
-- Create a 2D customer map with 3–6 interpretable groups.
-- Report runtime, matrix sparsity, and memory usage.
-
-### Success Target Results
-
-| Target | Result | Status |
-|---|---|---|
-| Generate 10 recommendations per customer | 54,740 recommendations for 5,474 customers | Achieved |
-| Evaluate using Hit Rate@10 | Evaluated on 1,916 eligible customers | Achieved |
-| Compare against bestseller baseline | 30.32% vs 26.83% | Achieved |
-| Create 3–6 customer groups | 4 clusters created | Achieved |
-| Report runtime and matrix sparsity | 2.41-second recommendation job; 98.32% sparsity | Achieved |
-| Report memory usage | Sparse/dense matrix sizes and Python-tracked fit memory reported | Partially achieved; full process peaks not measured |
+The selected TruncatedSVD model improved the observed recommendation Hit Rate@10 compared with the bestseller baseline.
 
 ---
 
@@ -135,9 +138,9 @@ The cleaning rules were applied sequentially. The removal counts represent addit
 1. Cancelled invoices were removed because they do not represent completed purchases.
 2. Transactions with non-positive quantities were removed because they represent returns or invalid purchase quantities.
 3. Transactions with non-positive prices were removed because they do not represent valid paid purchases.
-4. Identified non-product codes, such as postage, discounts, and bank charges, were excluded from product recommendations.
+4. Non-product codes, such as postage, discounts, and bank charges, were excluded from product recommendations.
 5. Transactions with missing customer IDs were removed because customer-level purchase histories require identifiable customers.
-6. Records with missing product descriptions were checked during cleaning; no additional rows were removed at that stage.
+6. Records with missing product descriptions were checked; no additional rows were removed at that stage.
 
 ### Cleaned Dataset Summary
 
@@ -161,7 +164,9 @@ The cleaning rules were applied sequentially. The removal counts represent addit
 
 The cleaned transactions were divided chronologically into training and testing data.
 
-The cutoff used was **2011-10-09 12:50**. Earlier transactions were used for training, while later transactions were reserved for evaluation.
+The cutoff used was **2011-10-09 12:50**.
+
+Transactions before the cutoff were used for training, while later transactions were reserved for evaluation.
 
 The split was completed before fitting the dimensionality reduction models to avoid training on future purchases.
 
@@ -178,7 +183,7 @@ The split was completed before fitting the dimensionality reduction models to av
 
 The eligible evaluation set focuses on previously unseen customer-product purchases involving customers and products represented in the training data.
 
-**Outputs:**
+### Outputs
 
 - `outputs/split_summary.csv`
 - `outputs/eligible_test_purchases.csv`
@@ -208,11 +213,13 @@ The matrix was stored in Compressed Sparse Row (CSR) format to reduce memory usa
 | Nonzero entries | 417,742 |
 | Representation | Binary CSR sparse matrix |
 
-**Outputs:**
+### Outputs
 
 - `outputs/customer_product_matrix.npz`
 - `outputs/customers.npy`
 - `outputs/products.npy`
+
+These intermediate files are generated locally and excluded from GitHub where specified by `.gitignore`.
 
 ---
 
@@ -232,9 +239,9 @@ The customer-product matrix is highly sparse because each customer purchases onl
 
 The sparse representation requires substantially less storage than a dense float32 matrix.
 
-These figures describe the matrix storage representation, not peak memory used during model fitting.
+These figures describe matrix storage requirements, not peak memory used during model fitting.
 
-**Output:** `outputs/matrix_report.csv`
+**Output:** `outputs/matrix_stats.csv`
 
 ---
 
@@ -276,13 +283,13 @@ For this implementation, PCA was fitted on a dense representation of the custome
 
 **Status: Completed**
 
-TruncatedSVD was fitted to the training-only customer-product matrix using component counts:
+TruncatedSVD was fitted to the training-only customer-product matrix using the following component counts:
 
 **k = 10, 20, 50, 100, 200**
 
 The implementation uses randomized TruncatedSVD with `random_state=42` and `n_iter=5`.
 
-### Experimental Results
+#### Experimental Results
 
 | Components (k) | Explained Variance (%) | Relative Reconstruction Error |
 |---|---:|---:|
@@ -292,7 +299,7 @@ The implementation uses randomized TruncatedSVD with `random_state=42` and `n_it
 | 100 | 35.73 | 0.7828 |
 | 200 | 47.91 | 0.7047 |
 
-### Observations
+#### Observations
 
 As the number of components increases:
 
@@ -306,7 +313,7 @@ The final number of components was selected using recommendation performance rat
 
 The k=50 and k=100 models achieved the same observed Hit Rate@10. The k=50 model was selected because it uses fewer components.
 
-### Outputs
+#### Outputs
 
 - `outputs/svd_results.csv`
 - `outputs/svd_reconstruction_error.png`
@@ -325,7 +332,7 @@ A personalized product recommendation system was developed using TruncatedSVD wi
 
 The recommendation process uses product factor vectors obtained from the SVD component matrix.
 
-### Recommendation Method
+#### Recommendation Method
 
 1. Load the trained SVD product factor vectors.
 2. Compute cosine similarity between products.
@@ -335,7 +342,7 @@ The recommendation process uses product factor vectors obtained from the SVD com
 6. Rank candidate products by their scores.
 7. Use a bestseller fallback when fewer than 10 positively scored recommendations are available.
 
-### Recommendation Results
+#### Recommendation Results
 
 | Metric | Result |
 |---|---:|
@@ -346,13 +353,11 @@ The recommendation process uses product factor vectors obtained from the SVD com
 | Recommendations per customer | 10 |
 | Total recommendations | 54,740 |
 | Previously purchased products recommended | 0 |
-| Non-positive recommendation scores | 20 |
-
-The 20 non-positive scores are associated with the recommendation output and are consistent with the fallback mechanism used to fill recommendation lists.
+| Fallback recommendations with non-positive similarity scores | 20 |
 
 The validation confirmed that no previously purchased products were recommended.
 
-### Outputs
+#### Outputs
 
 - `outputs/product_neighbors_50.npy`
 - `outputs/cosine_recommendations_50.csv`
@@ -371,7 +376,7 @@ A recommendation counts as a hit when at least one of the customer's top-10 reco
 
 All models were evaluated using the same 1,916 eligible customers.
 
-### Hit Rate@10 Results
+#### Hit Rate@10 Results
 
 | Model | Hit Rate@10 (%) | Customers Hit |
 |---|---:|---:|
@@ -383,7 +388,7 @@ All models were evaluated using the same 1,916 eligible customers.
 | SVD k=200 | 27.30 | 523 |
 | PCA k=50 | 30.32 | 581 |
 
-### Key Findings
+#### Key Findings
 
 TruncatedSVD with 50 components achieved a Hit Rate@10 of **30.32%**, compared with **26.83%** for the bestseller baseline.
 
@@ -393,7 +398,7 @@ The k=50 and k=100 models achieved the same observed recommendation performance,
 
 Increasing the number of components did not always improve recommendation performance.
 
-### Nightly Recommendation Job Timing
+#### Recommendation Job Timing
 
 The recommendation-generation job was timed using `time.perf_counter()`.
 
@@ -402,13 +407,13 @@ The recommendation-generation job was timed using `time.perf_counter()`.
 | Selected model | TruncatedSVD, k=50 |
 | Customers processed | 5,474 |
 | Recommendations generated | 54,740 |
-| Recommendation job runtime | 2.41 seconds |
+| Recommendation job runtime | 2.27 seconds |
 
 The measured job includes product similarity computation, nearest-neighbor selection, recommendation generation, and CSV export.
 
 The timing excludes SVD model fitting and subsequent recommendation validation.
 
-### Evaluation Limitation
+#### Evaluation Limitation
 
 The same held-out evaluation period was used to compare component counts and select k=50.
 
@@ -420,7 +425,7 @@ Therefore, the reported Hit Rate@10 is an exploratory model-selection result rat
 
 ---
 
-### ML5: PCA vs TruncatedSVD Comparison
+### ML5: PCA vs. TruncatedSVD Comparison
 
 **Status: Comparison performed; memory measurement limitation documented**
 
@@ -430,7 +435,7 @@ TruncatedSVD was fitted directly to the sparse matrix.
 
 PCA was fitted using a dense version of the same matrix with the randomized solver.
 
-### Comparison Results
+#### Comparison Results
 
 | Metric | TruncatedSVD | PCA |
 |---|---:|---:|
@@ -445,7 +450,7 @@ PCA was fitted using a dense version of the same matrix with the randomized solv
 
 Fit times are from one recorded run and may vary between executions.
 
-### Component 1 Interpretation
+#### Component 1 Interpretation
 
 **TruncatedSVD:** The first component represents a broad purchasing-activity pattern, with positive contributions from frequently purchased products. High-loading product codes include 85123A, 21212, and 22423.
 
@@ -453,25 +458,25 @@ Fit times are from one recorded run and may vary between executions.
 
 Both methods show several common high-loading products, suggesting that they capture related purchasing patterns.
 
-### Memory Measurement Limitation
+#### Memory Measurement Limitation
 
 The reported peak-memory values were measured using Python's `tracemalloc`.
 
 These values measure Python-tracked allocations rather than complete process peak memory.
 
-In addition, the conversion of the sparse matrix to a dense array for PCA occurred before the `tracemalloc` measurement began.
+The conversion of the sparse matrix to a dense array for PCA occurred before the `tracemalloc` measurement began.
 
 Therefore, these values should not be interpreted as full process-memory peaks or complete memory costs of each method.
 
-### Comparison Conclusion
+#### Comparison Conclusion
 
 Both methods achieved the same observed Hit Rate@10 at k=50.
 
 PCA explained slightly more variance, but TruncatedSVD was faster in the recorded fitting run and works directly with the sparse input matrix.
 
-TruncatedSVD remains the preferred method for this project because it avoids the dense input conversion required by the PCA implementation used here.
+TruncatedSVD remains the preferred method because it avoids the dense input conversion required by the PCA implementation used here.
 
-### Outputs
+#### Outputs
 
 - `outputs/pca_svd_comparison.csv`
 - `outputs/pca_embeddings_50.npy`
@@ -486,25 +491,25 @@ TruncatedSVD remains the preferred method for this project because it avoids the
 
 **Status: Completed**
 
-Customer segmentation was performed using K-means clustering on the 50-dimensional TruncatedSVD customer embeddings.
+Customer segmentation was performed using K-Means clustering on the 50-dimensional TruncatedSVD customer embeddings.
 
 Four clusters were created using `random_state=42` and `n_init=10`.
 
 The first two SVD components were used to visualize customers in a two-dimensional scatter plot.
 
-### Cluster Sizes
+#### Cluster Sizes and Segment Names
 
-| Cluster | Customers | Percentage |
-|---|---:|---:|
-| Cluster 0 | 1,165 | 21.3% |
-| Cluster 1 | 4,045 | 73.9% |
-| Cluster 2 | 258 | 4.7% |
-| Cluster 3 | 6 | 0.1% |
-| Total | 5,474 | 100% |
+| Cluster | Customer Segment | Customers | Percentage |
+|---|---|---:|---:|
+| 0 | General Gift & Homeware Shoppers | 1,165 | 21.3% |
+| 1 | Occasional Mixed-Product Shoppers | 4,045 | 73.9% |
+| 2 | High-Activity Gift & Homeware Shoppers | 258 | 4.7% |
+| 3 | Small Specialty-Product Group | 6 | 0.1% |
+| **Total** | | **5,474** | **100%** |
 
-### Cluster Interpretation
+The segment names are descriptive working labels based on the observed purchasing patterns. They are not independently validated marketing personas.
 
-#### Cluster 0
+#### Cluster 0: General Gift & Homeware Shoppers
 
 This group contains 1,165 customers.
 
@@ -514,7 +519,7 @@ The majority of customers are from the United Kingdom (1,064), followed by Germa
 
 The cluster shows purchasing overlap across several common products.
 
-#### Cluster 1
+#### Cluster 1: Occasional Mixed-Product Shoppers
 
 This is the largest group, containing 4,045 customers.
 
@@ -522,9 +527,9 @@ Top products include 85123A, 22423, 22138, 84879, and 47566.
 
 Most customers are from the United Kingdom (3,691), with smaller groups from Germany (62) and France (59).
 
-This cluster represents the largest segment of customers in the dataset.
+This cluster represents the largest customer segment in the dataset.
 
-#### Cluster 2
+#### Cluster 2: High-Activity Gift & Homeware Shoppers
 
 This group contains 258 customers.
 
@@ -532,9 +537,9 @@ Top products include 21212, 20725, 85123A, 22382, and 20728.
 
 The majority are from the United Kingdom (238), followed by Germany (6) and France (6).
 
-Several of the leading products appear across a high proportion of customers in this smaller segment.
+Several leading products appear across a high proportion of customers in this smaller segment.
 
-#### Cluster 3
+#### Cluster 3: Small Specialty-Product Group
 
 This is the smallest cluster, containing only 6 customers.
 
@@ -544,19 +549,20 @@ Four customers are from the United Kingdom, and two are from EIRE.
 
 This is a distinct but very small group, so its interpretation should be treated cautiously.
 
-### Key Observations
+#### Key Observations
 
 - The majority of customers belong to Cluster 1.
 - Cluster 3 contains only six customers and appears separated from the larger groups in the 2D map.
 - Product purchasing patterns differ across clusters.
 - Customers from the United Kingdom dominate all four clusters.
-- The two-dimensional map is a visualization of the first two SVD components, while clustering uses all 50 dimensions.
+- The 2D map displays the first two SVD components, while clustering uses all 50 dimensions.
+- Customer IDs are not displayed in the visualization.
 
-Customer IDs are not displayed in the visualization.
+#### Customer Segmentation Visualization
 
-### Output
+![Customer Segmentation Using TruncatedSVD](outputs/customer_clusters.png)
 
-- `outputs/customer_clusters.png`
+**Output:** `outputs/customer_clusters.png`
 
 **Script:** `customer_map.py`
 
@@ -570,7 +576,7 @@ Python 3.13.7
 
 ### Libraries
 
-The project uses Python libraries including:
+The project uses:
 
 - pandas
 - numpy
@@ -587,21 +593,29 @@ Open PowerShell in the project directory.
 
 Create a virtual environment:
 
-    python -m venv .venv
+```powershell
+python -m venv .venv
+```
 
 Activate the environment:
 
-    .venv\Scripts\Activate.ps1
+```powershell
+.venv\Scripts\Activate.ps1
+```
 
 Install dependencies:
 
-    python -m pip install -r requirements.txt
+```powershell
+python -m pip install -r requirements.txt
+```
 
 ### Dataset Setup
 
 Download the UCI Online Retail II dataset and place the Excel workbook at:
 
-    data/raw/online_retail_II.xlsx
+```text
+data/raw/online_retail_II.xlsx
+```
 
 The raw dataset and virtual environment are excluded from Git using `.gitignore`.
 
@@ -609,52 +623,62 @@ The raw dataset and virtual environment are excluded from Git using `.gitignore`
 
 Run the following commands in order:
 
-    python build_matrix.py
-    python train_model.py
-    python recommend_cosine.py
-    python compare_models.py
-    python evaluate.py
-    python customer_map.py
+```powershell
+python build_matrix.py
+python train_model.py
+python recommend_cosine.py
+python compare_models.py
+python evaluate.py
+python customer_map.py
+```
 
 These commands rebuild the data processing, model fitting, recommendations, evaluation, comparison, and customer segmentation outputs.
 
+To rebuild only the customer-product matrix from the raw dataset:
+
+```powershell
+python build_matrix.py
+```
+
 ### Random Seeds
 
-Random state 42 is used for TruncatedSVD, PCA, and K-means clustering.
+Random state 42 is used for TruncatedSVD, PCA, and K-Means clustering.
 
 ### Main Output Files
 
-Data processing:
+**Data processing:**
 
 - `outputs/cleaning_log.csv`
 - `outputs/split_summary.csv`
 - `outputs/eligible_test_purchases.csv`
 - `outputs/customer_product_matrix.npz`
-- `outputs/matrix_report.csv`
+- `outputs/matrix_stats.csv`
 
-Dimensionality reduction:
+**Dimensionality reduction:**
 
 - `outputs/svd_results.csv`
 - `outputs/svd_reconstruction_error.png`
 - `outputs/svd_embeddings_50.npy`
 - `outputs/svd_components_50.npy`
 
-Recommendations and evaluation:
+**Recommendations and evaluation:**
 
 - `outputs/product_neighbors_50.npy`
 - `outputs/cosine_recommendations_50.csv`
 - `outputs/evaluation_results.csv`
 
-Model comparison:
+**Model comparison:**
 
 - `outputs/pca_svd_comparison.csv`
 - `outputs/pca_embeddings_50.npy`
 - `outputs/pca_components_50.npy`
 - `outputs/pca_mean_50.npy`
 
-Customer segmentation:
+**Customer segmentation:**
 
 - `outputs/customer_clusters.png`
+
+Generated `.npy` and `.npz` files are excluded from Git and can be recreated using the project scripts.
 
 ### Reproducibility Notes
 
@@ -682,17 +706,23 @@ Customer segmentation:
 - [x] ML1: Method selection and justification
 - [x] ML2: Dimensionality reduction experiments
 - [x] ML3: Cosine-similarity product recommendations
-- [x] ML4: Hit Rate@10 evaluation and nightly-job timing
-- [x] ML5: PCA vs TruncatedSVD comparison, including fit time,Python-tracked peak memory, stored factor size,recommendation accuracy, and component interpretation
+- [x] ML4: Hit Rate@10 evaluation and recommendation job timing
+- [x] ML5: PCA vs. TruncatedSVD comparison
 - [x] ML6: Customer segmentation and 2D visualization
 
-### Submission Materials
+### Project Files
 
-- [x] README with project objectives, methods, and results
-- [ ] Final one-page stakeholder memo
-- [ ] Five-minute presentation
-- [ ] Final notebook and reproducibility verification
-- [ ] Git contribution log and individual reflection
+| File | Description |
+|---|---|
+| `build_matrix.py` | Data cleaning, splitting, and matrix construction |
+| `train_model.py` | TruncatedSVD experiments |
+| `recommend_cosine.py` | Product recommendation generation |
+| `evaluate.py` | Hit Rate@10 evaluation |
+| `compare_models.py` | PCA and TruncatedSVD comparison |
+| `customer_map.py` | Customer segmentation and visualization |
+| `notebooks/project_analysis.ipynb` | Project analysis notebook |
+| `requirements.txt` | Python dependencies |
+| `README.md` | Project documentation |
 
 ---
 
@@ -705,6 +735,8 @@ Customer segmentation:
 5. The PCA memory comparison uses Python-tracked allocations rather than full process peak memory.
 6. Component count selection used the held-out evaluation period, so the reported performance is exploratory.
 7. Bestseller fallback recommendations may have non-positive cosine scores because their ranking is based on popularity rather than positive similarity.
+8. The customer segment labels are exploratory and should be validated before use in marketing campaigns.
+9. Offline Hit Rate@10 does not establish improvements in actual purchases or revenue.
 
 ---
 
@@ -713,3 +745,4 @@ Customer segmentation:
 Chen, D. (2012). *Online Retail II* [Dataset]. UCI Machine Learning Repository.
 
 https://doi.org/10.24432/C5CG6D
+
